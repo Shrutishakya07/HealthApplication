@@ -1,4 +1,5 @@
 import React from 'react'
+import './App.css';
 import Navbar from '../components/Navbar';
 import Home from '../pages/Home';
 import Services from '../pages/Services';
@@ -13,7 +14,7 @@ import PrivateRoute from '../components/PrivateRoute';
 import Footer from '../components/Footer';
 import { Route, Routes } from 'react-router-dom';
 import { useState } from 'react';
-import "./index.css";
+
 
 function App() {
   const[isLoggedIn, setIsLoggedIn] = useState(false);

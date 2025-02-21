@@ -26,7 +26,7 @@ function Navbar(props) {
             <div>
                 <Link to="/">
                     <FcConferenceCall />
-                    <p>ConferencePoint</p>
+                    <p className='text-red-500'>ConferencePoint</p>
                 </Link>
             </div>
             
