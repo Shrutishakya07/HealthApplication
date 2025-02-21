@@ -4,6 +4,7 @@ const Admin = require('../models/Admin');
 const Provider = require('../models/Provider');
 const jwt = require('jsonwebtoken');
 const Profile = require('../models/Profile');
+const mailSender = require('../utils/mailSender')
 require('dotenv').config();
 
 //create account 
@@ -82,15 +83,23 @@ exports.signup = async (req,res) => {
                 qualification,
                 image:image || `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
                 bio,
-                additionalDetails: profileDetails._id 
+                additionalDetails: profileDetails._id ,
+                isApproved: false 
             });
         } else if (accountType === 'admin') {
+            //create profile entry in db
+        const profileDetails = await Profile.create({
+            gender:null,
+            phone:null,
+            about:null,
+        })
             user = await Admin.create({
                 firstName,
                 lastName,
                 email,
                 accountType,
                 password: hashPassword,
+                additionalDetails: profileDetails._id ,
                 image:image || `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
             });
         } else {
@@ -141,6 +150,14 @@ exports.login = async (req,res) => {
         if (!user) {
             return res.status(401).json({ success: false, message: 'User not found, please create an account' });
         }
+        //check provider status before logging in
+        if (userType === "provider" && !user.isApproved) {
+            return res.status(403).json({
+                success: false,
+                message: "Your account is pending approval. Please wait for admin approval.",
+            });
+        }
+        
         //compare password
         if(await bcrypt.compare(password,user.password)){
             const payload = {
@@ -196,5 +213,46 @@ exports.logout = async (req, res) => {
     } catch (error) {
         console.error(" Error in logout:", error);
         return res.status(500).json({ success: false, message: 'Logout failed' });
+    }
+};
+
+exports.getPendingProviders = async (req, res) => {
+    try {
+        const providers = await Provider.find({ isApproved: false }).populate('additionalDetails');
+        res.status(200).json({ success: true, providers });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching pending providers' });
+    }
+};
+
+exports.approveProvider = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const provider = await Provider.findByIdAndUpdate(id, { isApproved: true }, { new: true });
+        if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
+        
+        // Send approval email
+        await mailSender(provider.email, 'Approval Notification', 'Your account has been approved. You can now log in.');
+        
+        res.status(200).json({ success: true, message: 'Provider approved successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error approving provider' });
+    }
+};
+
+exports.rejectProvider = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rejectionMessage } = req.body;
+        const provider = await Provider.findById(id);
+        if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
+        
+        // Send rejection email
+        await mailSender(provider.email, 'Rejection Notification', `Your signup request was rejected. Reason: ${rejectionMessage}`);
+        
+        await Provider.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: 'Provider rejected and deleted' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error rejecting provider' });
     }
 };

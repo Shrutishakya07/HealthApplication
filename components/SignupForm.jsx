@@ -90,7 +90,7 @@ function SignupForm({setIsLoggedIn}) {
             setIsLoggedIn(true);
               navigate("/login");
             } catch (err) {
-              setError(err.response?.data?.message || "Signup failed");
+              setError(err.response?.data?.message || "Signup failed.Please try again.");
             }
           };
 
@@ -157,9 +157,35 @@ function SignupForm({setIsLoggedIn}) {
         {/* Fields for Providers */}
         {accountType === "provider" && (
           <>
-            <input type="text" name="specialization" placeholder="Specialization" onChange={handleChange} required />
+            <span>Specialization:</span>
+                <select
+                    name="specialization"
+                    value={formData.specialization}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">Select Specialization</option>
+                    <option value="Medical Consultant">Medical Consultant</option>
+                    <option value="Therapist">Therapist</option>
+                    <option value="Researcher">Researcher</option>
+                    <option value="Analyst">Analyst</option>
+                </select>
             <input type="number" name="experience" placeholder="Experience (years)" onChange={handleChange} required />
-            <input type="text" name="qualification" placeholder="Qualification" onChange={handleChange} required />
+            <span>Qualification:</span>
+                <select
+                    name="qualification"
+                    value={formData.qualification}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="">Select Qualification</option>
+                    <option value="BTech">BTech</option>
+                    <option value="PhD">PhD</option>
+                    <option value="BSc">BSc</option>
+                    <option value="MSc">MSc</option>
+                    <option value="MBA">MBA</option>
+                    <option value="MTech">MTech</option>
+                </select>
           </>
         )}
         <button type="submit">Create Account</button>

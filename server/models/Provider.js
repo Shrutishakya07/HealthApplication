@@ -15,7 +15,7 @@ const providerSchema = new mongoose.Schema({
         type: Number, 
         required: true
     },
-    accountType: { type: String, enum: ['user', 'provider','admin'], required: true ,default:'user'},
+    accountType: { type: String, enum: ['user', 'provider','admin'], required: true ,default:'provider'},
     calendly_link: {type: String},
     email: { type: String, required: true, trim:true },
     password: {type: String, required: true},
@@ -37,8 +37,8 @@ const providerSchema = new mongoose.Schema({
         required: true,
     },
     availability: [{ day: String, slots: [String] }],
-    appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }]
-    
+    appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }],
+    isApproved: { type: Boolean, default: false }, // Approval Status
 });
 
 module.exports = mongoose.model('Provider', providerSchema);

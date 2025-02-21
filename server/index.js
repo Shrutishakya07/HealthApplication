@@ -26,16 +26,30 @@ const user = require('./routes/user')
 const profile = require('./routes/profile')
 const provider = require('./routes/provider')
 const review = require('./routes/review')
+const admin = require('./routes/admin')
 app.use('/api/v1/auth',user);
 app.use('/api/v1/profile',profile);
 app.use('/api/v1/provider',provider);
 app.use('/api/v1/review',review);
+app.use('/api/v1/admin',admin);
 
-app.use(cors({
-    origin:'http://127.0.0.1:3000',
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'] 
-}))
+const allowedOrigins = [
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:4000",
+    "http://localhost:4000"
+  ];
+  
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true
+  }));
 
 // Serve frontend build files
 app.use(express.static(path.join(__dirname, "../dist")));

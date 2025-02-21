@@ -8,6 +8,7 @@ function Profile({ setIsLoggedIn }) {
     const [error, setError] = useState("");
     const [user, setUser] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [pendingProviders, setPendingProviders] = useState([]);
     const [formData, setFormData] = useState({
         gender: "",
         phone: "",
@@ -41,6 +42,18 @@ function Profile({ setIsLoggedIn }) {
           specialization: res.data.user.additionalDetails?.specialization || "",
           experience: res.data.user.additionalDetails?.experience || "",
         });
+         // Fetch pending providers only if the user is an admin
+      if (res.data.user.accountType === "admin") {
+        const pendingProvidersRes = await axios.get(
+          "http://127.0.0.1:4000/api/v1/admin/providers/pending-providers",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        // Set the pending providers to state
+        setPendingProviders(pendingProvidersRes.data.providers);
+      }
         console.log(" Profile State After Fetch:", res.data.user.additionalDetails);
       } catch (err) {
         setError(err.response?.data?.message || "Error fetching profile");
@@ -61,6 +74,9 @@ function Profile({ setIsLoggedIn }) {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      console.log("Token:", token);  // Log token to verify it's being retrieved
+       // Log formData to ensure the correct data is being sent
+      console.log("Sending form data:", formData);
       const res = await axios.put("http://127.0.0.1:4000/api/v1/profile/updateProfile", formData, {
         headers: { Authorization: `Bearer ${token}`,"Content-Type": "application/json" },
       });
@@ -82,6 +98,7 @@ function Profile({ setIsLoggedIn }) {
             experience: res.data.profile.experience,
         });
     } catch (err) {
+      console.error("Update Error:", err);
       setError(err.response?.data?.message || "Error updating profile");
     }
   };
@@ -111,6 +128,49 @@ function Profile({ setIsLoggedIn }) {
     }
   };
 
+   // Handle approval/rejection for admin
+   const handleApprove = async (providerId) => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await axios.put(
+        `http://127.0.0.1:4000/api/v1/admin/providers/${providerId}/approve`,
+        {  },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Provider approved successfully!');
+      // Remove approved provider from pending list
+      setPendingProviders(prevProviders =>
+        prevProviders.filter(provider => provider._id !== providerId)
+      );
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error approving provider');
+    }
+  };
+
+  const handleReject = async (providerId) => {
+    const rejectionMessage = prompt('Please provide the reason for rejection:');
+    if (!rejectionMessage) {
+      return alert('Rejection message is required.');
+    }
+    const token = localStorage.getItem('token');
+    try {
+      const res = await axios({
+        method: "DELETE",
+        url: `http://127.0.0.1:4000/api/v1/admin/providers/${providerId}/reject`,
+        headers: { Authorization: `Bearer ${token}` },
+        data: { rejectionMessage }  // Send rejectionMessage in `data`
+    });
+
+      alert('Provider rejected successfully!');
+      // Remove rejected provider from pending list
+      setPendingProviders(prevProviders =>
+        prevProviders.filter(provider => provider._id !== providerId)
+      );
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error rejecting provider');
+    }
+  };
+
   if (loading) return <p>Loading profile...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   return (
@@ -122,6 +182,31 @@ function Profile({ setIsLoggedIn }) {
             <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
             <p><strong>Email:</strong> {user?.email}</p>
             <p><strong>Account Type:</strong> {user?.accountType || "Not provided"}</p>
+
+             {/* Show message if provider is awaiting approval */}
+             {user?.accountType === "provider" && !user?.isApproved && (
+                        <p className="text-yellow-500">Your account is awaiting approval. Please wait for admin approval.</p>
+                    )}
+                    {/* Show pending providers */}
+                    {user?.accountType === "admin" && pendingProviders.length > 0 && (
+                      <div>
+                        <h3>Pending Providers</h3>
+                        <ul>
+                          {pendingProviders.map(provider => (
+                            <li key={provider._id}>
+                              <p><strong>Name:</strong> {provider.firstName} {provider.lastName}</p>
+                              <p><strong>Email:</strong> {provider.email}</p>
+                              <p><strong>Qualification:</strong> {provider.additionalDetails?.qualification || "Not provided"}</p>
+                              <p><strong>Specialization:</strong>{provider.additionalDetails?.specialization || "Not provided"}</p>
+                              <p><strong>Experience:</strong>{provider.additionalDetails?.experience ? `${provider.additionalDetails.experience} years` : "Not provided"}</p>
+                              {/* Add other provider details as needed */}
+                              <button onClick={() => handleApprove(provider._id)}>Approve Provider</button>
+                              <button onClick={() => handleReject(provider._id)}>Reject Provider</button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
         </>
       ) : (
         <p>Loading user data...</p>
@@ -140,6 +225,7 @@ function Profile({ setIsLoggedIn }) {
           <p><strong>Experience:</strong> {profile?.experience ? `${profile.experience} years` : "Not provided"}</p>
         </>
        )}
+       
 
         </>
     )}
@@ -150,7 +236,38 @@ function Profile({ setIsLoggedIn }) {
         <form onSubmit={handleUpdate}>
         <label className="block">
           <span>Gender:</span>
-          <input type="text" name="gender" value={formData.gender} onChange={handleChange} />
+          <div>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Male"
+                                    checked={formData.gender === "Male"}
+                                    onChange={handleChange}
+                                />
+                                Male
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Female"
+                                    checked={formData.gender === "Female"}
+                                    onChange={handleChange}
+                                />
+                                Female
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Other"
+                                    checked={formData.gender === "Other"}
+                                    onChange={handleChange}
+                                />
+                                Other
+                            </label>
+                        </div>
         </label>
         <label className="block">
           <span>Phone:</span>

@@ -10,8 +10,10 @@ import Signup from '../pages/Signup';
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import PrivateRoute from '../components/PrivateRoute';
+import Footer from '../components/Footer';
 import { Route, Routes } from 'react-router-dom';
 import { useState } from 'react';
+import "./index.css";
 
 function App() {
   const[isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,15 +27,16 @@ function App() {
         <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />}/>
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/services" element={Services}/>
-        <Route path="/about" element={About}/>
-        <Route path="/contacts" element={Contacts}/>
+        <Route path="/services" element={<Services/>}/>
+        <Route path="/about" element={<About/>}/>
+        <Route path="/contacts" element={<Contacts/>}/>
         <Route path="/profile" element={
           <PrivateRoute isLoggedIn={isLoggedIn}>
             <Profile setIsLoggedIn={setIsLoggedIn}/>
           </PrivateRoute>
           }/>
       </Routes>
+      <Footer/>
     </div>
   )
 }

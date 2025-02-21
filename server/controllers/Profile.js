@@ -1,6 +1,7 @@
 const Profile = require('../models/Profile')
 const User = require('../models/User')
 const Provider = require('../models/Provider')
+const Admin = require('../models/Admin')
 
 exports.updateProfile = async(req,res,) => {
     try{
@@ -14,22 +15,38 @@ exports.updateProfile = async(req,res,) => {
         if(!gender || !phone ){
             return res.status(400).json({message: 'All fields are required'})
         }
+        let userDetails = await User.findById(id)
+        if (userDetails instanceof Provider) {
+            // Check for provider-specific fields if they are provided
+            if (qualification && qualification.trim() === "") {
+                return res.status(400).json({ message: 'Qualification cannot be empty' });
+            }
+            if (specialization && specialization.trim() === "") {
+                return res.status(400).json({ message: 'Specialization cannot be empty' });
+            }
+            if (experience !== undefined && experience < 0) {
+                return res.status(400).json({ message: 'Experience cannot be negative' });
+            }
+        }
         console.log(" Extracted User ID from Token:", id);
 
-        let userDetails = await User.findById(id)
+        
         if (!userDetails) {
             userDetails = await Provider.findById(id);  // Check for provider if not a user
+        }
+        if (!userDetails) {
+            userDetails = await Admin.findById(id);  // Check for provider if not a user
         }
         if(!userDetails){
             return res.status(404).json({success:false,message: 'User not found'})
         }
-        console.log("User/Provider Found:", userDetails);
+        console.log("User/Provider/Admin Found:", userDetails);
 
         const profileId = userDetails.additionalDetails
         if(!profileId){
             return res.status(400).json({success:false,message: 'User profile not found'})
         }
-        
+        console.log("Profile ID:", profileId);
         const profileDetails = await Profile.findById(profileId)
         if (!profileDetails) {
             return res.status(404).json({ success: false, message: "Profile not found" });
@@ -72,6 +89,9 @@ exports.deleteAccount = async(req,res) => {
         if (!userDetails) {
             userDetails = await Provider.findById(id);  // Check for provider if not a user
         }
+        if (!userDetails) {
+            userDetails = await Admin.findById(id);  // Check for provider if not a user
+        }
         if(!userDetails){
             return res.status(404).json({success:false,message: 'User not found'})
         }
@@ -84,6 +104,9 @@ exports.deleteAccount = async(req,res) => {
             await User.findByIdAndDelete(id);
         } else if (userDetails instanceof Provider) {
             await Provider.findByIdAndDelete(id);
+        }
+        else if (userDetails instanceof Admin) {
+            await Admin.findByIdAndDelete(id);
         }
         return res.status(200).json({success:true,message: 'Account deleted successfully'})
     }
@@ -103,18 +126,21 @@ exports.getProfile = async(req,res) => {
         if (!userDetails) {
             userDetails = await Provider.findById(id).populate('additionalDetails').exec(); // Check for provider if not found in user
         }
-        
-        if(!userDetails){
-            return res.status(404).json({success:false,message: 'User not found'})
+        if (!userDetails) {
+            userDetails = await Admin.findById(id).populate('additionalDetails').exec(); 
+        }
+        console.log("User Details After Population:", userDetails); 
+        if(!userDetails || !userDetails.additionalDetails){
+            return res.status(404).json({success:false,message: 'profile not found'})
         }
         console.log("Retrieved User Details:", userDetails);
 
-        const profileData = {
+        const profileData = userDetails.additionalDetails ? {
             ...userDetails.additionalDetails.toObject(),
-            qualification: userDetails.additionalDetails?.qualification || "",
-            specialization: userDetails.additionalDetails?.specialization || "",
-            experience: userDetails.additionalDetails?.experience || 0,
-          };
+            qualification: userDetails.additionalDetails.qualification || "",
+            specialization: userDetails.additionalDetails.specialization || "",
+            experience: userDetails.additionalDetails.experience || 0,
+        } : {};  
 
         return res.status(200).json({
             success:true, 
