@@ -14,10 +14,13 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.13.0",
     "@tailwindcss/vite": "^4.0.4",
+    "animate.css": "^4.1.1",
     "axios": "^1.7.9",
     "concurrently": "^9.1.2",
     "create-vite": "^6.2.0",
+    "framer-motion": "^12.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",

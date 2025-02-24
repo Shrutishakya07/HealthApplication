@@ -35,7 +35,7 @@ exports.updateProfile = async(req,res,) => {
             userDetails = await Provider.findById(id);  // Check for provider if not a user
         }
         if (!userDetails) {
-            userDetails = await Admin.findById(id);  // Check for provider if not a user
+            userDetails = await Admin.findById(id);  // Check for admin if not a user
         }
         if(!userDetails){
             return res.status(404).json({success:false,message: 'User not found'})

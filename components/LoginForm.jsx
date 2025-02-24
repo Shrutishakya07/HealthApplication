@@ -46,10 +46,11 @@ function LoginForm({setIsLoggedIn}) {
       };
 
     return (
-        <form onSubmit={submitHandler}>
+        <form onSubmit={submitHandler} className='flex flex-col gap-2 w-[400px]  mt-15'>
             <label className='text-sm'>
                 <p className='mb-1'>Email Address<sup className='text-[#ff6600] ml-1'>*</sup></p>
                 <input
+                    className='border-2 border-gray-100 w-full'
                     type='email'
                     required
                     value={formData.email}
@@ -58,9 +59,10 @@ function LoginForm({setIsLoggedIn}) {
                     name='email'
                 />
             </label>
-            <label className='text-sm '>
+            <label className='text-sm relative'>
                 <p className='mb-1'>Password<sup className='text-[#ff6600] ml-1'>*</sup></p>
                 <input 
+                    className='border-2 border-gray-100 w-full '
                     type={show? ('text'):('password')}
                     required
                     value={formData.password}
@@ -68,15 +70,15 @@ function LoginForm({setIsLoggedIn}) {
                     onChange={handleChange}
                     name='password'
                 />
-                <span onClick={() => setShow((old) => !old)}>
+                <span onClick={() => setShow((old) => !old)} className='absolute ml-[-25px] mt-3.5 curser-pointer'>
                     {show ? (<AiOutlineEyeInvisible/>):(<AiOutlineEye/>)}
                 </span>
                 <Link to="/forgot-password">
-                    <p> Forgot Password</p>
+                    <p className='text-red-600 text-xs text-right tracking-wide'> Forgot Password?</p>
                 </Link>
             </label>
-            <button type="submit">
-                Sign In
+            <button type="submit" className="mt-5 relative overflow-hidden px-10 py-2.5 mx-auto font-semibold text-white bg-blue-500 border border-blue-500 rounded-3xl hover:scale-105 transition-all duration-300 ease-out">
+                <span className="relative text-white ">Sign In</span>
             </button>
         </form>
     )

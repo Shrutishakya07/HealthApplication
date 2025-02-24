@@ -20,24 +20,26 @@ function App() {
   const[isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
-    <div>
+    <div className='flex flex-col min-h-screen font-[Open_Sans]'>
       <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
-      <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>}/>
-        <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />}/>
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/services" element={<Services/>}/>
-        <Route path="/about" element={<About/>}/>
-        <Route path="/contacts" element={<Contacts/>}/>
-        <Route path="/profile" element={
-          <PrivateRoute isLoggedIn={isLoggedIn}>
-            <Profile setIsLoggedIn={setIsLoggedIn}/>
-          </PrivateRoute>
-          }/>
-      </Routes>
-      <Footer/>
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home/>}/>
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>}/>
+          <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />}/>
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/services" element={<Services/>}/>
+          <Route path="/about" element={<About/>}/>
+          <Route path="/contacts" element={<Contacts/>}/>
+          <Route path="/profile" element={
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+              <Profile setIsLoggedIn={setIsLoggedIn}/>
+            </PrivateRoute>
+            }/>
+        </Routes>
+      </main>
+      <Footer className='p-4 text-center mt-auto'/>
     </div>
   )
 }

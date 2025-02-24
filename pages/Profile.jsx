@@ -1,6 +1,8 @@
 import React , { useState, useEffect } from 'react'
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 
 function Profile({ setIsLoggedIn }) {
     const [profile, setProfile] = useState(null);
@@ -174,71 +176,90 @@ function Profile({ setIsLoggedIn }) {
   if (loading) return <p>Loading profile...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   return (
-    <div>
-        <h2>profile</h2>
+    <div className='mt-15 mb-30 '>
+        <h2 className='text-center text-xl text-gray-900'>Your Profile</h2>
         {user ? (
         <>
-            <p><img src={user.image} alt='profile' width="200px"/></p>
-            <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
-            <p><strong>Email:</strong> {user?.email}</p>
-            <p><strong>Account Type:</strong> {user?.accountType || "Not provided"}</p>
+            <p><img src={user.image} alt='profile' width="200px" className='rounded-full mx-auto'/></p>
+            <div  className=' mt-10 flex items-center justify-center gap-[30rem]'>
+              <div>
+                <p className='text-gray-700'><strong className=' text-red-700'>Name:</strong> {user?.firstName} {user?.lastName}</p>
+                <p className='text-gray-700'><strong className=' text-red-700'>Email:</strong> {user?.email}</p>
+                <p className='text-gray-700'><strong className=' text-red-700'>Account Type:</strong> {user?.accountType || "Not provided"}</p>
+              </div>
+              <div>
+                  {profile && (
+                    <>
+                        <p className='text-gray-700'><strong className=' text-red-700'>Gender:</strong> {profile?.gender || "Not provided"}</p>
+                        <p className='text-gray-700'><strong className=' text-red-700'>Phone:</strong> {profile?.phone || "Not provided"}</p>
+                        <p className='text-gray-700'><strong className=' text-red-700'>About:</strong> {profile?.about || "Not provided"}</p>
 
-             {/* Show message if provider is awaiting approval */}
-             {user?.accountType === "provider" && !user?.isApproved && (
-                        <p className="text-yellow-500">Your account is awaiting approval. Please wait for admin approval.</p>
+                        {user?.accountType === "provider" &&  (
+                        <>
+                        <p className='text-gray-700'><strong className=' text-red-700'>Qualification:</strong> {profile?.qualification || "Not provided"}</p>
+                        <p className='text-gray-700'><strong className=' text-red-700'>Specialization:</strong> {profile?.specialization || "Not provided"}</p>
+                        <p className='text-gray-700'><strong className=' text-red-700'>Experience:</strong> {profile?.experience ? `${profile.experience} years` : "Not provided"}</p>
+                      </>
                     )}
-                    {/* Show pending providers */}
-                    {user?.accountType === "admin" && pendingProviders.length > 0 && (
-                      <div>
-                        <h3>Pending Providers</h3>
-                        <ul>
-                          {pendingProviders.map(provider => (
-                            <li key={provider._id}>
-                              <p><strong>Name:</strong> {provider.firstName} {provider.lastName}</p>
-                              <p><strong>Email:</strong> {provider.email}</p>
-                              <p><strong>Qualification:</strong> {provider.additionalDetails?.qualification || "Not provided"}</p>
-                              <p><strong>Specialization:</strong>{provider.additionalDetails?.specialization || "Not provided"}</p>
-                              <p><strong>Experience:</strong>{provider.additionalDetails?.experience ? `${provider.additionalDetails.experience} years` : "Not provided"}</p>
-                              {/* Add other provider details as needed */}
-                              <button onClick={() => handleApprove(provider._id)}>Approve Provider</button>
-                              <button onClick={() => handleReject(provider._id)}>Reject Provider</button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    
+
+                      </>
+                  )}
+              </div>
+            </div>
         </>
       ) : (
-        <p>Loading user data...</p>
+        <p className='text-gray-800 text-center'>Loading user data...</p>
       )}
 
-    {profile && (
-    <>
-        <p><strong>Gender:</strong> {profile?.gender || "Not provided"}</p>
-        <p><strong>Phone:</strong> {profile?.phone || "Not provided"}</p>
-        <p><strong>About:</strong> {profile?.about || "Not provided"}</p>
+      <div className='flex items-center justify-center'>
+          {/* Show message if provider is awaiting approval */}
+          {user?.accountType === "provider" && !user?.isApproved && (
+                          <p className="text-red-500">Your account is awaiting approval. Please wait for admin approval.</p>
+                      )}
+                      {/* Show pending providers */}
+                      {user?.accountType === "admin" && pendingProviders.length > 0 && (
+                        <div className='mb-10 mt-10'>
+                          <h3 className='text-xl text-center mb-10'>Pending Providers</h3>
+                          <ul className='grid grid-cols-2 gap-[15rem]'>
+                            {pendingProviders.map(provider => (
+                              <li key={provider._id} className='flex flex-col gap-2'>
+                                <p className='text-gray-700'><strong className=' text-red-700'>Name:</strong> {provider.firstName} {provider.lastName}</p>
+                                <p className='text-gray-700'><strong className=' text-red-700'>Email:</strong> {provider.email}</p>
+                                <p className='text-gray-700'><strong className=' text-red-700'>Qualification:</strong> {provider.additionalDetails?.qualification || "Not provided"}</p>
+                                <p className='text-gray-700'><strong className=' text-red-700'>Specialization:</strong>{provider.additionalDetails?.specialization || "Not provided"}</p>
+                                <p className='text-gray-700'><strong className=' text-red-700'>Experience:</strong>{provider.additionalDetails?.experience ? `${provider.additionalDetails.experience} years` : "Not provided"}</p>
+                                {/* Add other provider details as needed */}
+                                <div className='flex gap-5 justify-right'>
+                                  <button onClick={() => handleApprove(provider._id)} className='bg-green-700 py-2 px-3 text-white rounded-sm w-max'>Approve Provider</button>
+                                  <button onClick={() => handleReject(provider._id)} className='bg-red-700 py-2 px-3 text-white rounded-sm w-max'>Reject Provider</button>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+      </div>
 
-        {user?.accountType === "provider" &&  (
-        <>
-          <p><strong>Qualification:</strong> {profile?.qualification || "Not provided"}</p>
-          <p><strong>Specialization:</strong> {profile?.specialization || "Not provided"}</p>
-          <p><strong>Experience:</strong> {profile?.experience ? `${profile.experience} years` : "Not provided"}</p>
-        </>
-       )}
-       
-
-        </>
-    )}
-
-    <button onClick={() => setShowForm(true)}>Edit Profile</button>
+    <button onClick={() => setShowForm(true)} className='flex items-center gap-1 text-sm bg-yellow-300 py-2 px-3 font-semibold rounded-sm hover:scale-105 transition-all duration-300 ease-out mt-5 mx-[19rem]'>
+      <FaEdit/>
+      <span>Edit Profile</span>
+    </button>
+    <div className='flex mt-[-2rem]'>
+          <button onClick={handleDelete} className='flex items-center gap-1 text-sm text-white bg-red-700 py-2 px-3 font-semibold rounded-sm hover:scale-105 transition-all duration-300 ease-out  ml-auto mx-[19rem]'>
+            <MdDelete />
+            <span>Delete Account</span>
+          </button>
+        </div>
 
     {showForm && (
-        <form onSubmit={handleUpdate}>
-        <label className="block">
-          <span>Gender:</span>
-          <div>
-                            <label>
+        <form onSubmit={handleUpdate} className='grid grid-cols-2 items-start mt-5 place-items-center'>
+        <label className="flex gap-3 items-center ">
+          <span className='text-gray-700 font-semibold'>Gender:</span>
+          <div className='flex gap-3 '>
+                            <label className='flex gap-1'>
                                 <input
+                                    className="text-blue-600 border-gray-300 focus:ring-blue-500" 
                                     type="radio"
                                     name="gender"
                                     value="Male"
@@ -247,8 +268,9 @@ function Profile({ setIsLoggedIn }) {
                                 />
                                 Male
                             </label>
-                            <label>
+                            <label className='flex gap-1'>
                                 <input
+                                    className="text-blue-600 border-gray-300 focus:ring-blue-500"
                                     type="radio"
                                     name="gender"
                                     value="Female"
@@ -257,8 +279,9 @@ function Profile({ setIsLoggedIn }) {
                                 />
                                 Female
                             </label>
-                            <label>
+                            <label className='flex gap-1'>
                                 <input
+                                    className="text-blue-600 border-gray-300 focus:ring-blue-500"
                                     type="radio"
                                     name="gender"
                                     value="Other"
@@ -269,37 +292,35 @@ function Profile({ setIsLoggedIn }) {
                             </label>
                         </div>
         </label>
-        <label className="block">
-          <span>Phone:</span>
-          <input type="text" name="phone" value={formData.phone} onChange={handleChange}/>
+        <label className="flex items-center gap-3">
+          <span className='text-gray-700 font-semibold'>Phone:</span>
+          <input type="text" name="phone" value={formData.phone} onChange={handleChange} className='border-b boder-gray-100 !rounded-none focus:drop-shadow-md '/>
         </label>
-        <label className="block">
-          <span>About:</span>
-          <textarea name="about" value={formData.about} onChange={handleChange}></textarea>
+        <label className="flex items-center gap-3">
+          <span className='text-gray-700 font-semibold'>About:</span>
+          <input type="text" name="about" value={formData.about} onChange={handleChange} className='border-b boder-gray-100 !rounded-none focus:drop-shadow-md '/>
         </label>
 
         {user?.accountType === "provider" && (
           <>
             <label>
-              <span>Qualification:</span>
-              <input type="text" name="qualification" value={formData.qualification} onChange={handleChange} />
+              <span className='text-gray-700 font-semibold'>Qualification:</span>
+              <input type="text" name="qualification" value={formData.qualification} onChange={handleChange} className='border-b boder-gray-100 !rounded-none focus:drop-shadow-md '/>
             </label>
             <label>
-              <span>Specialization:</span>
-              <input type="text" name="specialization" value={formData.specialization} onChange={handleChange} />
+              <span className='text-gray-700 font-semibold'>Specialization:</span>
+              <input type="text" name="specialization" value={formData.specialization} onChange={handleChange} className='border-b boder-gray-100 !rounded-none focus:drop-shadow-md '/>
             </label>
             <label>
-              <span>Experience (years):</span>
-              <input type="number" name="experience" value={formData.experience} onChange={handleChange} />
+              <span className='text-gray-700 font-semibold'>Experience (years):</span>
+              <input type="number" name="experience" value={formData.experience} onChange={handleChange} className='border-b boder-gray-100 !rounded-none focus:drop-shadow-md '/>
             </label>
           </>
         )}
 
-        <button type="submit">Update Profile</button>
+        <button type="submit" className='text-sm text-white bg-blue-700 py-2 px-3 font-semibold rounded-sm hover:scale-105 transition-all duration-300 ease-out w-max mt-5 '>Update Profile</button>
         </form>
     )}
-        <button >Make an Appointment</button>
-        <button onClick={handleDelete}>Delete Account</button>
     </div>
   )
 }

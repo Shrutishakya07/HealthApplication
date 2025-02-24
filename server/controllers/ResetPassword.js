@@ -10,11 +10,14 @@ exports.forgotPasswordToken = async (req, res) => {
         const email = req.body.email
         console.log(" Requested Email:", email);  // Log the email to ensure it's correct
         let user = await User.findOne({email: email});
+        let userType = "User";
         if (!user) {
             user = await Provider.findOne({ email: email });
+            userType = "Provider";
         }
         if (!user) {
             user = await Admin.findOne({ email: email });
+            userType = "Admin";
         }
 
         if(!user){
@@ -22,9 +25,26 @@ exports.forgotPasswordToken = async (req, res) => {
         }
         const token = crypto.randomUUID();
         console.log(" Generated Token:", token);
-        const updatedDetails = await User.findOneAndUpdate({email:email},
-            {token:token, resetPasswordExpires:Date.now() + 5*60*1000},
-        {new:true})
+        let updatedDetails;
+        if (userType === "User") {
+            updatedDetails = await User.findOneAndUpdate(
+                { email },
+                { token, resetPasswordExpires: Date.now() + 5 * 60 * 1000 },
+                { new: true }
+            );
+        } else if (userType === "Provider") {
+            updatedDetails = await Provider.findOneAndUpdate(
+                { email },
+                { token, resetPasswordExpires: Date.now() + 5 * 60 * 1000 },
+                { new: true }
+            );
+        } else {
+            updatedDetails = await Admin.findOneAndUpdate(
+                { email },
+                { token, resetPasswordExpires: Date.now() + 5 * 60 * 1000 },
+                { new: true }
+            );
+        }
         const frontendURL = `http://127.0.0.1:4000/reset-password/${token}`; // Change this to match your React app URL
 
         await mailSender(email, "Password Reset Link", `Click here to reset your password: ${frontendURL}`);
@@ -44,15 +64,42 @@ exports.resetPassword = async (req, res) => {
         if(password!==confirmPassword){
             return res.status(400).json({message: 'Passwords do not match'});
         }
-        const userDetails = await User.findOne({token});
+        let userDetails = await User.findOne({token});
+        let userType = "User";
+        if (!userDetails) {
+                    userDetails = await Provider.findOne({token});  // Check for provider if not a user
+                    userType = "Provider";
+                }
+        if (!userDetails) {
+                userDetails = await Admin.findOne({token});  // Check for admin if not a user
+                userType = "Admin";
+                }
         if(!userDetails){
-            return res.status(404).json({message: 'Token not found'});
-        }
+                return res.status(404).json({message: 'Token not found'});
+                }
         if(userDetails.resetPasswordExpires < Date.now()){
             return res.status(400).json({message: 'Token expired'});
         }
         const hashPassword = await bcrypt.hash(password,10);
-        await User.findOneAndUpdate({token:token}, {password:hashPassword, token: null, resetPasswordExpires: null}, {new:true});
+        if (userType === "User") {
+            await User.findOneAndUpdate(
+                { token },
+                { password: hashPassword, token: null, resetPasswordExpires: null },
+                { new: true }
+            );
+        } else if (userType === "Provider") {
+            await Provider.findOneAndUpdate(
+                { token },
+                { password: hashPassword, token: null, resetPasswordExpires: null },
+                { new: true }
+            );
+        } else {
+            await Admin.findOneAndUpdate(
+                { token },
+                { password: hashPassword, token: null, resetPasswordExpires: null },
+                { new: true }
+            );
+        }
         return res.status(200).json({success:true,message:'Password reset successfully'})
     }
     catch(error){
