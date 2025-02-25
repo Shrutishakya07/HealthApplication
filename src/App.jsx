@@ -12,6 +12,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import PrivateRoute from '../components/PrivateRoute';
 import Footer from '../components/Footer';
+import ReportAnalysis from '../pages/ReportAnalysis';
 import { Route, Routes } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -37,6 +38,8 @@ function App() {
               <Profile setIsLoggedIn={setIsLoggedIn}/>
             </PrivateRoute>
             }/>
+          <Route path='/reportAnalysis' element={<ReportAnalysis/>}/>
+
         </Routes>
       </main>
       <Footer className='p-4 text-center mt-auto'/>

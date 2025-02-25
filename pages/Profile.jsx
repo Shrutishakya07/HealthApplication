@@ -35,6 +35,7 @@ function Profile({ setIsLoggedIn }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data.user);
+        sessionStorage.setItem("userProfileInfo", JSON.stringify(res.data.user));
         setProfile(res.data.user.additionalDetails || {});
         setFormData({
           gender: res.data.user.additionalDetails?.gender || "",

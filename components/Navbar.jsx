@@ -50,6 +50,9 @@ function Navbar(props) {
                     <li  className="relative transition-all duration-300 ease-out hover:scale-105 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-white hover:after:w-full">
                         <Link to="/contacts">Contact Us</Link>
                     </li>
+                    <li className="relative transition-all duration-300 ease-out hover:scale-105 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-white hover:after:w-full">
+                        <Link to="/reportAnalysis">Report Analysis</Link>
+                    </li>
                 </ul>
             </nav>
 

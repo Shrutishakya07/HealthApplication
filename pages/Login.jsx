@@ -21,10 +21,10 @@ function Login({ setIsLoggedIn }) {
       </div>
       <DotLottieReact
         src="https://lottie.host/ffdaedd8-6037-4d5b-a52b-17acc7bbe907/LlM7uP9pHt.lottie"
-        loop
         background="transparent"
-        speed="1"
-        autoplay
+                    speed="1"
+                    loop
+                    autoplay
         style={{ width: "55rem", height: "35rem" }}
       />
     </div>
